@@ -9,6 +9,8 @@ echo "$source => $dest"
 
 #todo confirm source and dest disks
 
+copy_cmd="./ddfast.sh"
+
 ./apm_copy_apm.sh $source $dest
 first_block=1
 
@@ -22,7 +24,7 @@ while [ "$1" != "" ]; do
     ./apm_set_partition_size.sh $dest $partnum $optimal_size
     source_start=`./apm_get_first_block_number.sh $source $partnum`
     if [ $partnum != 1 ]; then #We already copied the apm
-        dd_cmds[$cmd_count]="./tivo_copy_partition.sh $source $source_start $dest $first_block $optimal_size"
+        dd_cmds[$cmd_count]="$copy_cmd $source $source_start $dest $first_block $optimal_size"
         human_size=`./util_blocks_to_size.sh $optimal_size`
         dd_txt[$cmd_count]="Copying partition $partnum with size $human_size"
         cmd_count=$(($cmd_count + 1))
