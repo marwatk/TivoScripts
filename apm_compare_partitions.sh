@@ -1,5 +1,23 @@
 #!/bin/bash
 
+#    Copyright Marcus Watkins marwatk@marcuswatkins.net
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#Usage: apm_compare_partitions.sh <device A> <device B>
+
+
 devicea=$1
 deviceb=$2
 
@@ -16,6 +34,7 @@ do
     
     size_a=`./apm_get_partition_size.sh $devicea $partnum`
     size_b=`./apm_get_partition_size.sh $deviceb $partnum`
+    
     
     size_to_use=$size_a
     
@@ -48,7 +67,7 @@ do
     
     allgood=1
     
-    for (( i=0; $i<10; i++ ))
+    for (( i=0; $i<$idx; i++ ))
     do
         
         offset=${offsets[$i]}
@@ -59,7 +78,7 @@ do
         md5b=`./util_md5_block.sh $deviceb $bblock`
         if [ $md5a != $md5b ]; then
             allgood=0
-            printf "%i: % 3s %010i %010i %s %s\n" $partnum $offset $ablock $bblock $md5a $md5b
+            printf "%i: [% 3s] %010i %s != %s %010i\n" $partnum $offset $ablock $md5a $md5b $bblock
         fi
     
     done

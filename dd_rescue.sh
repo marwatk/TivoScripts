@@ -15,14 +15,23 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#Usage: apm_set_partition_count.sh <device> <new partition count>
+#Usage: dd_rescue.sh <source_device> <source_position> <dest_device> <dest_position> <num_blocks_to_copy>
 
+source=$1
+source_pos=$2
+dest=$3
+dest_pos=$4
+size=$5
 
-device=$1
-partitioncount=$2
+block_size=512
 
-for(( i=1; i<=$partitioncount; i++ )) 
-    do
-        ./apm_write_value.sh $device $i 4 4 $partitioncount  
-    done
+source_pos=$(($source_pos * 512))
+dest_pos=$(($dest_pos * 512))
+$size=$(($size * 512))
+
+cmd="dd_rescue -s $source_pos -S $dest_pos -m $size $source $dest"
+
+echo $cmd
+$cmd
+
 
