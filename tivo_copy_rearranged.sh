@@ -70,9 +70,9 @@ while [ "$1" != "" ]; do
     partnum=$1
     shift
     optimal_size=`./apm_get_optimal_size.sh $source $partnum`
+
      # make sure this partition won't be over the end of the new disk.
     end_of_partition=$(($first_block + $optimal_size))
-
     if [ "$end_of_partition" -gt "$size_of_dest" ]; then
         optimal_size=$(( $optimal_size - ($end_of_partition - $size_of_dest) ))
     fi
