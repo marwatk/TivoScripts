@@ -62,17 +62,34 @@ first_block=1
 
 cmd_count=0
 
+#find size of dest drive
+size_of_dest=`blockdev --getsize64 $dest`
+
+printf "size_of_dest:"
+echo $size_of_dest
+printf "\n"
+
 while [ "$1" != "" ]; do
     partnum=$1
     shift
     optimal_size=`./apm_get_optimal_size.sh $source $partnum`
+    # make sure this partition won't be over the end of the new disk.
+    end_of_partition=$(($first_block + $optimal_size))
+    
+    printf "end_of_partition:"
+    echo end_of_partition
+    printf "\n"
+    
+    if [ "$end_of_partition" -gt "$size_of_dest" ];
+        optimal_size=$($optimal_size - ( $end_of_partition - $size_of_dest))
+    fi
     ./apm_set_first_block_number.sh $temp_apm $partnum $first_block
     ./apm_set_partition_size.sh $temp_apm $partnum $optimal_size
     source_start=`./apm_get_first_block_number.sh $source $partnum`
     if [ $partnum != 1 ]; then #We already copied the apm
         if [ $optimal_size == 8 ]; then #Bootstrap partitions are all zeros
             dd_cmds[$cmd_count]="dd if=/dev/zero of=$dest seek=$first_block bs=512 count=$optimal_size"
-        else        
+        else
             dd_cmds[$cmd_count]="$copy_cmd $source $source_start $dest $first_block $optimal_size"
         fi
         human_size=`./util_blocks_to_size.sh $optimal_size`
@@ -94,7 +111,7 @@ echo "=========================="
 ./apm_display.sh $temp_apm
 
 
-read -p "Press [enter] if everything looks correct...."
+read -p "Press [enter] if everything looks correct.... CTRL-C to cancel."
 
 printf "Copying new partition table to target drive...\n"
 ./apm_copy_apm.sh $temp_apm $dest
