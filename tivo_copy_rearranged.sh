@@ -63,26 +63,20 @@ first_block=1
 cmd_count=0
 
 #find size of dest drive
-size_of_dest=`blockdev --getsize64 $dest`
-
-printf "size_of_dest:"
-echo $size_of_dest
-printf "\n"
+size_of_dest_blocks=`blockdev --getsize64 $source`
+size_of_dest=$(($size_of_dest_blocks / 512 ))
 
 while [ "$1" != "" ]; do
     partnum=$1
     shift
     optimal_size=`./apm_get_optimal_size.sh $source $partnum`
-    # make sure this partition won't be over the end of the new disk.
+     # make sure this partition won't be over the end of the new disk.
     end_of_partition=$(($first_block + $optimal_size))
-    
-    printf "end_of_partition:"
-    echo end_of_partition
-    printf "\n"
-    
-    if [ "$end_of_partition" -gt "$size_of_dest" ];
-        optimal_size=$($optimal_size - ( $end_of_partition - $size_of_dest))
+
+    if [ "$end_of_partition" -gt "$size_of_dest" ]; then
+        optimal_size=$(( $optimal_size - ($end_of_partition - $size_of_dest) ))
     fi
+
     ./apm_set_first_block_number.sh $temp_apm $partnum $first_block
     ./apm_set_partition_size.sh $temp_apm $partnum $optimal_size
     source_start=`./apm_get_first_block_number.sh $source $partnum`
